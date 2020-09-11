@@ -1,0 +1,142 @@
+{
+  "version": 2,
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "host": [ "http://faker_api:8080" ],
+  "extra_config": {
+    "github_com/devopsfaith/krakend-gologging": {
+      "level":  "DEBUG",
+      "prefix": "[KRAKEND]",
+      "syslog": false,
+      "stdout": true
+    }
+  },
+  "endpoints": [
+    {
+      "endpoint": "/",
+      "backend": [
+        {
+          "url_pattern": "pong.json",
+          "whitelist": [ "message" ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/nick/{nick}",
+      "backend": [
+        {
+          "host": [ "https://api.github.com" ],
+          "url_pattern": "/users/{nick}",
+          "whitelist": [
+            "avatar_url",
+            "name",
+            "company",
+            "blog",
+            "location",
+            "mail",
+            "hireable",
+            "followers",
+            "public_repos",
+            "public_gists"
+          ],
+          "mapping": { "blog": "website" },
+          "group": "github"
+        },
+        {
+          "host": [ "https://api.bitbucket.org" ],
+          "url_pattern": "/2.0/users/{nick}",
+          "whitelist": [
+            "links.avatar",
+            "display_name",
+            "website",
+            "location"
+          ],
+          "mapping": { "display_name": "name" },
+          "group": "bitbucket"
+        }
+      ]
+    },
+    {
+        "endpoint": "/cars",
+        "method": "GET",
+        "backend": [
+            {
+                "url_pattern": "/cars",
+                "host": [
+                    "http://cars:3031"
+                ],
+                "is_collection": true,
+                "mapping": {
+                    "collection": "data"
+                },
+                "extra_config": {
+                    "github.com/devopsfaith/krakend/http": {
+                        "return_error_details": "backend"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "endpoint": "/bikes",
+        "method": "GET",
+        "backend": [
+            {
+                "url_pattern": "/bikes",
+                "host": [
+                    "http://bikes:3032"
+                ],
+                "is_collection": true,
+                "mapping": {
+                    "collection": "data"
+                },
+                "extra_config": {
+                    "github.com/devopsfaith/krakend/http": {
+                        "return_error_details": "backend"
+                    }
+                }
+            }
+        ]
+    },
+    {
+      "endpoint": "/login",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "backend": [
+          {
+              "url_pattern": "/authentication",
+              "host": [
+                  "http://users:3033"
+              ],
+              "encoding": "no-op",
+              "extra_config": {
+                  "github.com/devopsfaith/krakend/http": {
+                      "return_error_details": "backend"
+                  }
+              }
+          }
+      ]
+    },
+    {
+      "endpoint": "/users",
+      "method": "GET",
+      "headers_to_pass" : [
+        "Authorization"
+      ],
+      "backend": [
+          {
+              "url_pattern": "/users",
+              "host": [
+                  "http://users:3033"
+              ],
+              "extra_config": {
+                  "github.com/devopsfaith/krakend/http": {
+                      "return_error_details": "backend"
+                  }
+              }
+          }
+      ]
+    }
+  ]
+}
+
